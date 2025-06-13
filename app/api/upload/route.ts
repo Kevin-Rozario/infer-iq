@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
+import queue from "@/lib/bullmq/queue";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -24,6 +25,8 @@ export async function POST(request: NextRequest) {
     const filePath = path.join(uploadDir, file.name);
 
     await writeFile(filePath, buffer);
+
+    await queue.add("process-file", JSON.stringify({ filePath }));
 
     return NextResponse.json(
       { message: "File uploaded successfully" },
