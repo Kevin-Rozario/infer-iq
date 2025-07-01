@@ -1,0 +1,19 @@
+# Ignore build artifacts and output directories
+build/
+dist/
+coverage/
+
+# Ignore Node.js module dependencies
+node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore configuration files that might be handled by other tools or are not meant to be formatted
+.env
+.env.*
+.eslintrc.js
+prettier.config.js
+# Optionally, if you have specific generated files or data files
+# src/generated/
+# data/
