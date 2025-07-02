@@ -2,12 +2,12 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { Document } from "@langchain/core/documents";
 import embeddings from "./embeddings.config.js";
+import "dotenv/config";
 
-// Qdrant connection url
 const connectionUrl =
   process.env.QDRANT_CONNECTION_URL ?? "http://localhost:6333";
 
-// Create Qdrant vector store
+// Create a new QdrantVectorStore
 export async function createQdrantVectorStore(
   collectionName: string,
   recreateCollection: boolean = false,
@@ -30,27 +30,45 @@ export async function createQdrantVectorStore(
       await client.deleteCollection(collectionName);
     }
 
-    const currentCollectionsResponse = await client.getCollections();
-    const currentCollectionExists = currentCollectionsResponse.collections.some(
-      (c: { name: string }) => c.name === collectionName,
-    );
+    try {
+      const currentCollectionsResponse = await client.getCollections();
+      const currentCollectionExists =
+        currentCollectionsResponse.collections.some(
+          (c: { name: string }) => c.name === collectionName,
+        );
 
-    if (!currentCollectionExists) {
-      console.log(
-        `Collection '${collectionName}' does not exist. Creating new collection.`,
-      );
+      if (!currentCollectionExists) {
+        console.log(
+          `Collection '${collectionName}' does not exist. Creating new collection.`,
+        );
 
-      // The text-embedding-004 model outputs 768 dimensions
-      const vectorSize = 768;
-      await client.createCollection(collectionName, {
-        vectors: {
-          size: vectorSize,
-          distance: "Cosine",
-        },
-      });
-      console.log(`Collection '${collectionName}' created.`);
-    } else {
-      console.log(`Collection '${collectionName}' will be used.`);
+        // text-embedding-004 model outputs 768 dimensions
+        const vectorSize = 768;
+        await client.createCollection(collectionName, {
+          vectors: {
+            size: vectorSize,
+            distance: "Cosine",
+          },
+        });
+        console.log(`Collection '${collectionName}' created.`);
+      } else {
+        console.log(`Collection '${collectionName}' will be used.`);
+      }
+    } catch (error: any) {
+      // Handle 409 Conflict (collection already exists due to concurrent job)
+      if (
+        error.status === 409 ||
+        (error.data &&
+          error.data.status &&
+          error.data.status.error &&
+          error.data.status.error.includes("already exists"))
+      ) {
+        console.warn(
+          `Collection '${collectionName}' already exists (likely created by another concurrent job). Proceeding.`,
+        );
+      } else {
+        throw error;
+      }
     }
 
     return new QdrantVectorStore(embeddings, { client, collectionName });
@@ -83,7 +101,6 @@ export async function addDocumentsToQdrant(
   }
 }
 
-// Get Qdrant client
 export function getQdrantClient(): QdrantClient {
   return new QdrantClient({
     url: connectionUrl,
