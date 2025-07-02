@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import pdfRoutes from "./routes/pdf.route.js";
+import chatRoutes from "./routes/chat.route.js";
 
 const app = express();
 
@@ -20,5 +21,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/docs", pdfRoutes);
+app.use("/api/v1/chat", chatRoutes);
 
 export default app;
