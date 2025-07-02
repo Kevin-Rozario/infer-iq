@@ -23,7 +23,7 @@ export const chatHandler = asyncHandler(async (req: Request, res: Response) => {
 
   // Create a retriever to fetch relevant documents
   const retriever = vectorStore.asRetriever({
-    k: 3,
+    k: 5,
   });
 
   // Retrieve documents based on the user's query

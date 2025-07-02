@@ -39,7 +39,7 @@ export const generateSystemPrompt = (
 // Initialize the Google Generative AI LLM
 const llm = new ChatGoogleGenerativeAI({
   model: "gemini-2.0-flash",
-  temperature: 0,
+  temperature: 0.2,
   maxRetries: 2,
 });
 

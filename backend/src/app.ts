@@ -21,6 +21,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/docs", pdfRoutes);
-app.use("/api/v1/chat", chatRoutes);
+app.use("/api/v1/model", chatRoutes);
 
 export default app;
