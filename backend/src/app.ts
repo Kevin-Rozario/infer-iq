@@ -5,6 +5,7 @@ import { uploadMultiplePdf } from "./middlewares/multer.middleware.js";
 import ApiResponse from "./utils/apiResponse.util.js";
 import queue from "./config/queue.config.js";
 import ApiError from "./utils/apiError.util.js";
+import cleanQueue from "./utils/cleanQueue.util.js";
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 
 // Routes
@@ -32,6 +33,9 @@ app.post(
       throw new ApiError(400, "No files uploaded");
     }
 
+    // Clean the queue
+    await cleanQueue();
+
     await Promise.all(
       files.map((file) =>
         queue.add(
@@ -42,13 +46,13 @@ app.post(
           },
           {
             removeOnComplete: true,
-          }
-        )
-      )
+            removeOnFail: true,
+          },
+        ),
+      ),
     );
-
     res.status(200).json(new ApiResponse(200, "Files uploaded successfully!"));
-  }
+  },
 );
 
 export default app;
