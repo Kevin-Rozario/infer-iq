@@ -5,6 +5,6 @@ import { uploadMultiplePdf } from "../middlewares/multer.middleware.js";
 const router = Router();
 
 router.route("/collections").get(listCollections);
-router.route("/upload/pdfs").post(uploadMultiplePdf, pdfHandler);
+router.route("/pdfs/upload").post(uploadMultiplePdf, pdfHandler);
 
 export default router;
